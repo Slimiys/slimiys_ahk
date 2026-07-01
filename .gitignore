@@ -1,0 +1,10 @@
+# Артефакты сборки
+build/
+
+# Бинарники инструментов (исходники .ahk в tools/ в репозитории)
+tools/*.exe
+
+# Windows / IDE
+Thumbs.db
+Desktop.ini
+.cursor/
