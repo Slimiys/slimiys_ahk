@@ -23,6 +23,13 @@ global VolumeTooltipBorderColor := "7D7D94"
 global Archive7zPath := ""
 ; Пусто — авто-поиск python.exe / py.exe; иначе полный путь к интерпретатору.
 global BrightnessPythonExePath := ""
+; Каталог scripts репозитория rcs_hmi_xplat (рабочая папка для сборки HmiView.Desktop).
+global HmiScriptsDir := "C:\Work\rcs_hmi_xplat\scripts"
+global HmiDesktopProjectRelative := "..\HmiSoftware\HmiView.Desktop\HmiView.Desktop.csproj"
+global HmiDesktopRunArgs := "--robots a12:192.168.1.9:8003 --clear-logs"
+global HmiDesktopShellCommands := "dotnet build ..\HmiSoftware\HmiView.Desktop\ -c Debug; dotnet run --project " . HmiDesktopProjectRelative . " " . HmiDesktopRunArgs
+; Подстрока командной строки для поиска уже запущенного экземпляра (PowerShell / dotnet).
+global HmiDesktopProcessSignature := "HmiView.Desktop.csproj " . HmiDesktopRunArgs
 
 ResolveBrightnessPythonScriptPath()
 {

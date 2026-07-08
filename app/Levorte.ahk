@@ -26,3 +26,4 @@ SetWorkingDir, %A_ScriptDir%
 #Include %A_ScriptDir%\Levorte.Media.ahk
 #Include %A_ScriptDir%\Levorte.System.ahk
 #Include %A_ScriptDir%\Levorte.Brightness.ahk
+#Include %A_ScriptDir%\Levorte.Dev.ahk
