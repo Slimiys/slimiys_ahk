@@ -41,18 +41,36 @@ Return
 Return
 
 ; Alt+СКМ в проводнике: распаковать архив(ы) в открытую папку (отложенно — после отпускания Alt).
+; Только над окном проводника — не перехватываем !MButton у Яндекс Музыки.
+#If IsExplorerUnderMouseForArchiveExtract()
 !MButton::
     CoordMode, Mouse, Screen
     global extractPendingX, extractPendingY, extractPendingHwnd
     MouseGetPos, extractPendingX, extractPendingY, extractPendingHwnd
     SetTimer, ExtractExplorerArchivesDeferred, -40
 Return
+#If
 
 ExtractExplorerArchivesDeferred:
     SetTimer, ExtractExplorerArchivesDeferred, Off
-    global extractPendingX, extractPendingY, extractPendingHwnd
+    global extractPendingX, extractPendingY, extractPendingHwnd, extractArchivesBusy
+    if (extractArchivesBusy)
+        Return
+    extractArchivesBusy := true
     ExtractExplorerArchivesAtMouse(extractPendingX, extractPendingY, extractPendingHwnd)
+    extractArchivesBusy := false
 Return
+
+; Защита от повторного входа, пока идёт распаковка (в т.ч. долгая/с ошибкой).
+global extractArchivesBusy := false
+
+; true — курсор над окном проводника (CabinetWClass / ExploreWClass).
+IsExplorerUnderMouseForArchiveExtract()
+{
+    CoordMode, Mouse, Screen
+    MouseGetPos,,, hwndUnderMouse
+    return ResolveExplorerRootHwnd(hwndUnderMouse) != ""
+}
 
 ; --- Функции ---
 SetPowerScheme(powerSchemeGuid)
@@ -65,6 +83,20 @@ SetPowerScheme(powerSchemeGuid)
 }
 
 ExtractExplorerArchivesAtMouse(mouseX, mouseY, mouseHwnd)
+{
+    ; Всегда снимаем залипший Alt и прячем прогресс — иначе после ошибки хоткей «молчит».
+    try
+    {
+        ExtractExplorerArchivesAtMouseImpl(mouseX, mouseY, mouseHwnd)
+    }
+    catch e
+    {
+        ShowArchiveProgressTooltip("Ошибка распаковки", 2500)
+    }
+    SendInput {Blind}{LAlt up}{RAlt up}
+}
+
+ExtractExplorerArchivesAtMouseImpl(mouseX, mouseY, mouseHwnd)
 {
     ; MouseGetPos часто возвращает HWND дочернего контрола (ListView/DirectUI), не CabinetWClass.
     explorerHwnd := ResolveExplorerRootHwnd(mouseHwnd)
@@ -353,23 +385,73 @@ ExtractArchiveToFolder(archivePath, destFolder)
     sevenZip := Resolve7ZipPath()
     if (sevenZip != "")
     {
-        extractCmd := """" sevenZip """ x """ archivePath """ -o""" destOut """ -y"
-        RunWait, %extractCmd%,, Hide UseErrorLevel
-        return (ErrorLevel = 0)
+        ; -y — без вопросов; -p"" — не ждать пароль; иначе 7z зависает и хоткей «умирает».
+        extractCmd := """" . sevenZip . """ x """ . archivePath . """ -o""" . destOut . """ -y -p"""" -bso0 -bsp0"
+        exitCode := RunProcessWithTimeout(extractCmd, 120000)
+        ; 0 = OK, 1 = warning — считаем успехом.
+        return (exitCode = 0 || exitCode = 1)
     }
 
     SplitPath, archivePath,,,, fileExt
     StringLower, fileExt, fileExt
     if (fileExt = "zip")
     {
-        psCmd := "Expand-Archive -LiteralPath '" archivePath "' -DestinationPath '" destFolder "' -Force"
-        RunWait, %ComSpec% /c powershell.exe -NoProfile -ExecutionPolicy Bypass -Command %psCmd%,, Hide UseErrorLevel
-        return (ErrorLevel = 0)
+        psCmd := "Expand-Archive -LiteralPath '" . archivePath . "' -DestinationPath '" . destFolder . "' -Force"
+        fullCmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command " . psCmd
+        exitCode := RunProcessWithTimeout(fullCmd, 120000)
+        return (exitCode = 0)
     }
 
-    tarCmd := "tar -xf """ archivePath """ -C """ destFolder """"
-    RunWait, %ComSpec% /c %tarCmd%,, Hide UseErrorLevel
-    return (ErrorLevel = 0)
+    tarCmd := "tar -xf """ . archivePath . """ -C """ . destFolder . """"
+    exitCode := RunProcessWithTimeout(tarCmd, 120000)
+    return (exitCode = 0)
+}
+
+; Запускает команду через cmd с таймаутом (мс).
+; Возврат: код выхода; -1 — не запустился; -2 — таймаут (процесс убит).
+RunProcessWithTimeout(commandLine, timeoutMs := 120000)
+{
+    if (timeoutMs < 1000)
+        timeoutMs := 1000
+
+    exitFile := A_Temp . "\levorte_extract_exit_" . A_TickCount . ".txt"
+    FileDelete, %exitFile%
+
+    ; /v:on — !ERRORLEVEL! после команды; <nul — без ожидания ввода в консоли.
+    wrapped := ComSpec . " /v:on /c " . commandLine . " <nul & >""" . exitFile . """ echo !ERRORLEVEL!"
+    Run, %wrapped%,, Hide UseErrorLevel, procPid
+    if (ErrorLevel || !procPid)
+        return -1
+
+    startTick := A_TickCount
+    Loop
+    {
+        Process, Exist, %procPid%
+        if (!ErrorLevel)
+            Break
+        if (A_TickCount - startTick >= timeoutMs)
+        {
+            Process, Close, %procPid%
+            Sleep, 200
+            Process, Exist, %procPid%
+            if (ErrorLevel)
+                Process, Close, %procPid%
+            FileDelete, %exitFile%
+            return -2
+        }
+        Sleep, 100
+    }
+
+    exitCode := ""
+    if (FileExist(exitFile))
+    {
+        FileRead, exitCode, %exitFile%
+        FileDelete, %exitFile%
+    }
+    exitCode := Trim(exitCode, " `t`r`n")
+    if (exitCode = "" || exitCode is not integer)
+        return 0
+    return exitCode + 0
 }
 
 Resolve7ZipPath()
