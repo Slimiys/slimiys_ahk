@@ -14,6 +14,7 @@ switcher/
 │   ├── Levorte.System.ahk  # IP, архивы, схемы питания
 │   ├── Levorte.Brightness.ahk
 │   ├── Levorte.Dev.ahk       # HMI / dotnet
+│   ├── Levorte.Macro.ahk     # Запись и воспроизведение макросов
 │   ├── brightness/
 │   │   └── auto_brightness.py
 │   └── icon.ico
@@ -37,6 +38,7 @@ switcher/
 #Include Levorte.System.ahk     ; использует GetMonitorIndexAtPoint из Media
 #Include Levorte.Brightness.ahk ; SetBrightnessLevel вызывается из System
 #Include Levorte.Dev.ahk
+#Include Levorte.Macro.ahk
 ```
 
 ## Ключевые потоки

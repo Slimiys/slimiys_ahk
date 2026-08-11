@@ -23,13 +23,35 @@ global VolumeTooltipBorderColor := "7D7D94"
 global Archive7zPath := ""
 ; Пусто — авто-поиск python.exe / py.exe; иначе полный путь к интерпретатору.
 global BrightnessPythonExePath := ""
-; Каталог scripts репозитория rcs_hmi_xplat (рабочая папка для сборки HmiView.Desktop).
+; Каталог scripts репозитория rcs_hmi_xplat (рабочая папка для сборки HMI).
 global HmiScriptsDir := "C:\Work\rcs_hmi_xplat\scripts"
 global HmiDesktopProjectRelative := "..\HmiSoftware\HmiView.Desktop\HmiView.Desktop.csproj"
 global HmiDesktopRunArgs := "--robots a12:192.168.1.9:8003 --clear-logs"
 global HmiDesktopShellCommands := "dotnet build ..\HmiSoftware\HmiView.Desktop\ -c Debug; dotnet run --project " . HmiDesktopProjectRelative . " " . HmiDesktopRunArgs
 ; Подстрока командной строки для поиска уже запущенного экземпляра (PowerShell / dotnet).
 global HmiDesktopProcessSignature := "HmiView.Desktop.csproj " . HmiDesktopRunArgs
+; Сборка и запуск Android HMI.
+global HmiAndroidScript := ".\build_and_run_android.ps1"
+global HmiAndroidRobotsArgs := "-robots a12:192.168.1.9:8003"
+global HmiAndroidExtraArgs := "--auto --dotnet 10"
+; Подстрока командной строки для поиска уже запущенного Android-запуска.
+global HmiAndroidProcessSignature := "build_and_run_android.ps1 " . HmiAndroidRobotsArgs
+; Дамп logcat в log.txt (рабочая папка — HmiScriptsDir).
+global HmiAndroidLogcatCommand := "adb logcat -d -v time -s DOTNET:I PERF:I DIAG:I PERF_SIGNAL_VM:I SCROLL_TRACE:I *:S > log.txt"
+global HmiAndroidLogcatOutputFile := "log.txt"
+; Сборка linux-x64 и деплой HMI по SSH (шкаф / пульт / кастом).
+global HmiLinuxDeployScript := ".\build_and_deploy_linux_shkaf.ps1"
+global HmiSshPasswordlessScript := ".\setup_ssh_passwordless.ps1"
+global HmiLinuxDeployRemotePath := "~/Desktop/hmi_lin"
+global HmiLinuxDeployShkafUser := "shkaf"
+global HmiLinuxDeployShkafHost := "192.168.1.205"
+global HmiLinuxDeployPultUser := "hmi"
+global HmiLinuxDeployPultHost := "192.168.1.108"
+; Подстрока для остановки предыдущего деплоя.
+global HmiLinuxDeployProcessSignature := "build_and_deploy_linux_shkaf.ps1"
+; Последний записанный макрос (клавиатура/мышь).
+global MacroLastDir := "C:\Work\scripts\switcher\macros"
+global MacroLastFilePath := "C:\Work\scripts\switcher\macros\last_macro.txt"
 
 ResolveBrightnessPythonScriptPath()
 {

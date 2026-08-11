@@ -30,9 +30,10 @@ Return
     UpdatePoEFilter(False)
 Return
 
-+NumpadHome::
-    UpdatePoEBuild(True)
-Return
+; Временно отключено
+; +NumpadHome::
+;     UpdatePoEBuild(True)
+; Return
 
 +NumpadPgUp::
     UpdatePoEBuild(False)
