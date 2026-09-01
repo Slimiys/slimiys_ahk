@@ -19,8 +19,9 @@ global PowerSchemeSilent := "a9932169-f1fb-4dff-9034-fe1c4ca1886e"
 ; Всплывающая подсказка громкости (Gui): фон внутренней панели и цвет рамки (полоски Progress).
 global VolumeTooltipBgColor := "18181B"
 global VolumeTooltipBorderColor := "7D7D94"
-; Пусто — авто-поиск 7z.exe; иначе полный путь к 7-Zip.
-global Archive7zPath := ""
+; Тултип результата сборки HMI (успех / ошибка).
+global BuildTooltipSuccessBgColor := "1B7A3D"
+global BuildTooltipFailureBgColor := "B91C1C"
 ; Пусто — авто-поиск python.exe / py.exe; иначе полный путь к интерпретатору.
 global BrightnessPythonExePath := ""
 ; Каталог scripts репозитория rcs_hmi_xplat (рабочая папка для сборки HMI).
@@ -45,13 +46,40 @@ global HmiSshPasswordlessScript := ".\setup_ssh_passwordless.ps1"
 global HmiLinuxDeployRemotePath := "~/Desktop/hmi_lin"
 global HmiLinuxDeployShkafUser := "shkaf"
 global HmiLinuxDeployShkafHost := "192.168.1.205"
-global HmiLinuxDeployPultUser := "hmi"
+; В ~/.ssh/config для 192.168.1.108 указан User pult и IdentityFile (не hmi из copy_to_pult.bat).
+global HmiLinuxDeployPultUser := "pult"
 global HmiLinuxDeployPultHost := "192.168.1.108"
+; Куда класть файлы при Ctrl+Alt+СКМ в проводнике (scp).
+global SshCopyRemotePath := "~/Desktop/"
 ; Подстрока для остановки предыдущего деплоя.
 global HmiLinuxDeployProcessSignature := "build_and_deploy_linux_shkaf.ps1"
+; Аргументы запуска rcs_hmi на удалённой машине (как у Desktop).
+global HmiLinuxDeployAppArgs := HmiDesktopRunArgs
+; Флаги --test-ui раздельно для Desktop (Ctrl+Alt+Z) и Android (Ctrl+Alt+X); цифра 3 в диалоге.
+; Значения подхватываются из Levorte.state.ini при первом использовании.
+global HmiDesktopTestUiEnabled := false
+global HmiAndroidTestUiEnabled := false
+global HmiTestUiArg := "--test-ui"
+global HmiTestUiTarget := "full"
+global HmiTestUiIterations := 10
+global HmiTestUiExtraFlags := "auto-start"
+; Удалённые логи HMI; локально — тот же путь, что у Desktop HMI.
+global HmiLinuxLogsRemotePath := "~/.Eidos_robotics/HMI/Logs"
+global HmiLinuxLogsLocalDir := "C:\ProgramData\Eidos_robotics\HMI\Logs"
+; Логи консоли сборок HMI (Ctrl+Alt+Z/X/C). Пусто — <корень репо>/logs.
+global HmiBuildLogsDir := ""
+; Максимум строк ошибок в диалоге разбора лога.
+global HmiBuildLogErrorPreviewLimit := 20
 ; Последний записанный макрос (клавиатура/мышь).
 global MacroLastDir := "C:\Work\scripts\switcher\macros"
 global MacroLastFilePath := "C:\Work\scripts\switcher\macros\last_macro.txt"
+
+ResolveCompileLevorteScriptPath()
+{
+    ; app\ или build\ → <repo>\scripts\Compile-Levorte.ps1
+    SplitPath, A_ScriptDir, , repoRoot
+    return repoRoot . "\scripts\Compile-Levorte.ps1"
+}
 
 ResolveBrightnessPythonScriptPath()
 {

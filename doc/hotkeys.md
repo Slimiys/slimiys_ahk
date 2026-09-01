@@ -8,7 +8,7 @@
 |-----------|----------|
 | `Ctrl + Alt + W` | Показать заголовок и класс активного окна (отладка) |
 | `Ctrl + NumpadSub` | Ввод `masterkey` + Enter |
-| `Ctrl + NumpadDel` | Перезагрузить скрипт |
+| `Ctrl + NumpadDel` | Собрать `Levorte.exe` через `scripts/Compile-Levorte.ps1` (перезапуск) |
 | `Alt + Q` | Виртуальный рабочий стол влево (`Win + Ctrl + Left`) |
 | `Alt + W` | Виртуальный рабочий стол вправо (`Win + Ctrl + Right`) |
 
@@ -48,9 +48,7 @@
 | `Ctrl + Alt + I` | Список локальных IPv4 (клик — копировать и вставить) |
 | `Ctrl + Alt + O` | Публичный IP и страна (`api.myip.com`) |
 | `Win + Del` | Очистить корзину |
-| `Alt + СКМ` в проводнике | Распаковать архив(ы) под курсором в подпапку с именем архива |
-
-Поддерживаемые архивы: `.zip`, `.7z`, `.rar`, `.tar`, `.gz`, `.bz2`, `.xz` и составные расширения.
+| `Ctrl + Alt + СКМ` в проводнике | Выделенный файл/папка → `Ctrl+Shift+C` (путь) → `scp` на Шкаф / Пульт / свой `user@host` (`~/Desktop/`) |
 
 ## Path of Exile (Levorte.Games.ahk)
 
@@ -64,6 +62,14 @@
 | `Shift + NumpadRight` | Импорт фильтра PoE2 из Downloads |
 | `Shift + NumpadHome` | Импорт билда PoE1 в BuildPlanner *(временно отключён)* |
 | `Shift + NumpadPgUp` | Импорт билда PoE2 в BuildPlanner |
+
+## Torchlight: Infinite (Levorte.Games.ahk)
+
+Только при активном окне **Torchlight: Infinite**:
+
+| Сочетание | Действие |
+|-----------|----------|
+| `ПКМ` | Пока ПКМ нажата — `A` отпущена; после отпускания ПКМ автоматически зажимается `A` |
 
 ## Яндекс Музыка (Levorte.Media.ahk)
 
@@ -81,9 +87,12 @@
 
 | Сочетание | Действие |
 |-----------|----------|
-| `Ctrl + Alt + Z` | Сборка и запуск HmiView.Desktop из `C:\Work\rcs_hmi_xplat\scripts`; при повторном нажатии — остановка предыдущего запуска с теми же аргументами |
-| `Ctrl + Alt + X` | Диалог Android HMI в `C:\Work\rcs_hmi_xplat\scripts`: `1` = `--release`, `2` = `--debug` (`build_and_run_android.ps1 -robots a12:192.168.1.9:8003 … --auto --dotnet 10`), `3` = `adb logcat … > log.txt` |
-| `Ctrl + Alt + C` | Диалог деплоя Linux HMI (`build_and_deploy_linux_shkaf.ps1`): `1` = Шкаф (`shkaf@192.168.1.205`), `2` = Пульт (`hmi@192.168.1.108`), `3` = кастом (user + IP; опционально `setup_ssh_passwordless.ps1`) |
+| `Ctrl + Alt + Z` | Диалог HmiView.Desktop: `1` = сборка (лог + разбор) и запуск, `3` = переключить `--test-ui`, `5/6` = iterations. Флаг и число сохраняются |
+| `Ctrl + Alt + X` | Диалог Android HMI: `1` = `--release`, `2` = `--debug`, `3` = `--test-ui`, `4` = `adb logcat`, `5/6` = iterations. Сборка пишется в лог, после завершения — разбор |
+| `Ctrl + Alt + C` | Linux HMI: `1` = деплой (лог + разбор), `2` = выгрузить логи. Цель: Шкаф / Пульт / кастом |
+| `Ctrl + Alt + L` | Повторный разбор последнего лога сборки HMI и открытие в Notepad |
+
+Единый лог консоли: `logs/hmi-build.log` (перезаписывается при каждой новой сборке; разбор дописывается в конец того же файла).
 
 ## Макросы (Levorte.Macro.ahk)
 

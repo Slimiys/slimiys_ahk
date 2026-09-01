@@ -2,7 +2,103 @@
 ; Игровые хоткеи (Path of Exile)
 ; ============================================================
 
-; --- Хоткеи ---
+; --- Hotkey Torchlight Infinite ---
+; toggle удержания клавиши A
+global TorchlightInfiniteAToggled := false
+global TorchlightInfiniteModeEnabled := false
+
+OnExit, TorchlightInfiniteARelease
+
+TorchlightInfiniteARelease:
+if (TorchlightInfiniteAToggled)
+    TorchlightInfiniteReleaseA()
+Return
+
+IsTorchlightInfiniteWindowActive()
+{
+    return WinActive("Torchlight: Infinite")
+}
+
+IsTorchlightInfiniteRButtonModeActive()
+{
+    global TorchlightInfiniteModeEnabled
+    return TorchlightInfiniteModeEnabled && IsTorchlightInfiniteWindowActive()
+}
+
+ToggleTorchlightInfiniteRButtonMode()
+{
+    global TorchlightInfiniteModeEnabled
+    TorchlightInfiniteModeEnabled := !TorchlightInfiniteModeEnabled
+    if (TorchlightInfiniteModeEnabled)
+        ShowTemporaryTooltip("Режим ПКМ→A: включён", 1500)
+    else
+    {
+        if (TorchlightInfiniteAToggled)
+            TorchlightInfiniteReleaseA()
+        ShowTemporaryTooltip("Режим ПКМ→A: выключен", 1500)
+    }
+}
+
+TorchlightInfinitePressA()
+{
+    global TorchlightInfiniteAToggled
+    SendInput {Blind}{a down}
+    TorchlightInfiniteAToggled := true
+    ; Периодически переотправляем down, чтобы A не «отлипала» в игре/при потере фокуса.
+    SetTimer, TorchlightInfiniteAHoldPulse, 120
+    SetTimer, TorchlightInfiniteAEnsureRelease, 200
+}
+
+TorchlightInfiniteReleaseA()
+{
+    global TorchlightInfiniteAToggled
+    SendInput {Blind}{a up}
+    TorchlightInfiniteAToggled := false
+    SetTimer, TorchlightInfiniteAHoldPulse, Off
+    SetTimer, TorchlightInfiniteAEnsureRelease, Off
+}
+
+; Alt+Ctrl+A — включить/выключить режим «ПКМ отпустил → A зажата».
+#If IsTorchlightInfiniteWindowActive()
+!^a::
+    ToggleTorchlightInfiniteRButtonMode()
+Return
+#If
+
+; Режим активен только после включения через Alt+Ctrl+A.
+#If IsTorchlightInfiniteRButtonModeActive()
+~RButton::
+    if (TorchlightInfiniteAToggled)
+        TorchlightInfiniteReleaseA()
+Return
+
+~RButton Up::
+    ; Небольшая задержка: сначала завершается обработка нажатия ПКМ, затем зажимаем A.
+    SetTimer, TorchlightInfiniteAOnRButtonUp, -15
+Return
+#If
+
+TorchlightInfiniteAOnRButtonUp:
+    if (!IsTorchlightInfiniteRButtonModeActive())
+        Return
+    TorchlightInfinitePressA()
+Return
+
+TorchlightInfiniteAHoldPulse:
+    if (!TorchlightInfiniteAToggled)
+        Return
+    if (!IsTorchlightInfiniteRButtonModeActive())
+        Return
+    SendInput {Blind}{a down}
+Return
+
+TorchlightInfiniteAEnsureRelease:
+    if (!TorchlightInfiniteAToggled)
+        Return
+    if (!IsTorchlightInfiniteRButtonModeActive())
+        TorchlightInfiniteReleaseA()
+Return
+
 #if WinActive("Path of Exile")
 
     !Enter::
